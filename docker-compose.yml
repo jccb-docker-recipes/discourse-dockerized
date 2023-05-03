@@ -1,0 +1,116 @@
+version: '2'
+services:
+  postgresql:
+    image: docker.io/bitnami/postgresql:15
+    volumes:
+      - 'postgresql_data:/bitnami/postgresql'
+    environment:
+      # super user password
+      - POSTGRESQL_POSTGRES_PASSWORD=SUPER-SECRET-1122334455
+      - POSTGRESQL_USERNAME=bn_discourse
+      - POSTGRESQL_DATABASE=bitnami_discourse
+      - POSTGRESQL_PASSWORD=SECRET--PGSQL--00000000
+  redis:
+    image: docker.io/bitnami/redis:7.0
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - REDIS_PASSWORD=SECRET-REDIS-5544332211
+    volumes:
+      - 'redis_data:/bitnami/redis'
+  discourse:
+    image: docker.io/bitnami/discourse:3
+    ports:
+      - '5080:3000'
+    volumes:
+      - 'discourse_data:/bitnami/discourse'
+      - 'discourse_tmp:/tmp'
+    depends_on:
+      - postgresql
+      - redis
+    environment:
+
+      - DISCOURSE_USERNAME=SECRET-admin
+      - DISCOURSE_PASSWORD=SECRET--discourse--1122334455
+      - DISCOURSE_EMAIL=velegno@gmail.com
+      - DISCOURSE_HOST=discourse.SECRET-project.eu
+      - DISCOURSE_PRECOMPILE_ASSETS="no"
+      - DISCOURSE_SKIP_BOOTSTRAP=yes
+      # Bootstrap should be eventually set to yes on the first installation
+      - DISCOURSE_SMTP_HOST=SECRET-project.eu
+      - DISCOURSE_SMTP_PORT=587
+      - DISCOURSE_SMTP_USER=discourse
+      - DISCOURSE_SMTP_PASSWORD=SECRET--discourse--1122334455
+      - DISCOURSE_SMTP_PROTOCOL=tls
+      - DISCOURSE_SMTP_AUTH=plain
+      # Redis
+      - DISCOURSE_REDIS_HOST=redis
+      - DISCOURSE_REDIS_PASSWORD=SECRET-REDIS-5544332211
+      - DISCOURSE_REDIS_PORT_NUMBER=6379
+      # Database
+      - DISCOURSE_DATABASE_HOST=postgresql
+      - DISCOURSE_DATABASE_PORT_NUMBER=5432
+      - DISCOURSE_DATABASE_USER=bn_discourse
+      - DISCOURSE_DATABASE_NAME=bitnami_discourse
+      - DISCOURSE_DATABASE_PASSWORD=SECRET--PGSQL--00000000
+      # Postgres client
+      - POSTGRESQL_CLIENT_DATABASE_HOST=postgresql
+      - POSTGRESQL_CLIENT_DATABASE_PORT_NUMBER=5432
+      - POSTGRESQL_CLIENT_POSTGRES_USER=postgres
+      - POSTGRESQL_CLIENT_POSTGRES_PASSWORD=SUPER-SECRET-1122334455
+      # Create database
+      - POSTGRESQL_CLIENT_CREATE_DATABASE_NAME=bitnami_discourse
+      - POSTGRESQL_CLIENT_CREATE_DATABASE_USER=bn_discourse
+      - POSTGRESQL_CLIENT_CREATE_DATABASE_PASSWORD=SECRET--PGSQL--00000000
+      - POSTGRESQL_CLIENT_CREATE_DATABASE_EXTENSIONS=hstore,pg_trgm
+
+
+  sidekiq:
+    image: docker.io/bitnami/discourse:3
+    depends_on:
+      - discourse
+    volumes:
+      - 'sidekiq_data:/bitnami/discourse'
+    command: /opt/bitnami/scripts/discourse-sidekiq/run.sh
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+
+      - DISCOURSE_USERNAME=SECRET-admin
+      - DISCOURSE_PASSWORD=SECRET--discourse--1122334455
+      - DISCOURSE_EMAIL=velegno@gmail.com
+      - DISCOURSE_HOST=discourse.SECRET-project.eu
+      - DISCOURSE_PRECOMPILE_ASSETS="no"
+      - DISCOURSE_SKIP_BOOTSTRAP=yes
+      # Bootstrap should be eventually set to yes on the first installation
+      - DISCOURSE_SMTP_HOST=SECRET-project.eu
+      - DISCOURSE_SMTP_PORT=587
+      - DISCOURSE_SMTP_USER=discourse
+      - DISCOURSE_SMTP_PASSWORD=SECRET--discourse--1122334455
+      - DISCOURSE_SMTP_PROTOCOL=tls
+      - DISCOURSE_SMTP_AUTH=plain
+      # Redis
+      - DISCOURSE_REDIS_HOST=redis
+      - DISCOURSE_REDIS_PASSWORD=SECRET-REDIS-5544332211
+      - DISCOURSE_REDIS_PORT_NUMBER=6379
+      # Database
+      - DISCOURSE_DATABASE_HOST=postgresql
+      - DISCOURSE_DATABASE_PORT_NUMBER=5432
+      - DISCOURSE_DATABASE_USER=bn_discourse
+      - DISCOURSE_DATABASE_NAME=bitnami_discourse
+      - DISCOURSE_DATABASE_PASSWORD=SECRET--PGSQL--00000000
+      # Postgres client
+      - POSTGRESQL_CLIENT_DATABASE_HOST=postgresql
+      - POSTGRESQL_CLIENT_DATABASE_PORT_NUMBER=5432
+      - POSTGRESQL_CLIENT_POSTGRES_USER=postgres
+      - POSTGRESQL_CLIENT_POSTGRES_PASSWORD=SUPER-SECRET-1122334455
+
+volumes:
+  postgresql_data:
+    driver: local
+  redis_data:
+    driver: local
+  discourse_data:
+    driver: local
+  discourse_tmp:
+    driver: local
+  sidekiq_data:
+    driver: local
